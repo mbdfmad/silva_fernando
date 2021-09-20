@@ -1,0 +1,279 @@
+---
+title: "TAREA.1"
+author: "Fernando Silva"
+date: "20/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+chlstrl <- read.csv("./DATA/cholesterol.csv", header = TRUE)
+```
+
+```{r}
+summary(chlstrl)
+```
+Analisis exploratorio
+Variables cuantitativas
+#Nivel de colesterol
+```{r}
+ggplot(chlstrl, aes(x=chol)) + 
+  geom_histogram(mapping = aes(y=stat(density)),
+                 , fill="red", color="blue", binwidth = 20) + 
+  geom_density(color="yellow", size= 1.5)
+```
+
+
+```{r}
+ggplot(chlstrl) +
+  geom_histogram(mapping = aes(age), color="red", fill="blue", binwidth = 5)
+```
+
+
+```{r}
+count(chlstrl,gender)
+```
+##Tabla de frequencias relativa
+```{r}
+table(chlstrl$gender)/length(chlstrl$gender)
+```
+```{r}
+ggplot(chlstrl, mapping=aes(gender)) +
+  geom_bar(fill="red",color="blue")
+```
+
+
+```{r}
+ggplot(chlstrl, mapping= aes(y=weight,x=height ), color ="pink4") +
+  geom_point(color="red") +
+  geom_smooth(se=FALSE, color="green")
+```
+```{r}
+ggplot(chlstrl, aes(x=height)) +
+  geom_histogram(mapping=aes(y=stat(density)),
+                 fill="red", color="black", binwidth=2) +
+  geom_density(color="yellow", size=1.5)
+```
+
+```{r}
+ggplot(chlstrl, aes(x=weight)) +
+  geom_histogram(mapping=aes(y=stat(density)),
+                 fill="red", color="blue", binwidth=10) +
+  geom_density(color="yellow", size=1.5)
+```
+
+```{r}
+ggplot(chlstrl, aes(x=waist)) +
+  geom_histogram(mapping=aes(y=stat(density)),
+                 fill="red", color="blue", binwidth=3) +
+  geom_density(color="black", size=1.5)
+```
+
+```{r}
+ggplot(chlstrl, aes(x=hip)) +
+  geom_histogram(mapping=aes(y=stat(density)),
+                 fill="red", color="blue", binwidth=3) +
+  geom_density(color="yellow", size=1.5)
+```
+
+```{r}
+chlstrl %>% 
+  summarize(med_edad = median(age), media_edad = mean(age), desvmed_edad=mad(age))
+```
+
+```{r}
+ggplot(chlstrl, aes(age), binwidth = 40) +
+  geom_histogram(fill="green")
+```
+```{r}
+chlstrl %>% 
+  summarise_if(is.numeric, mean)
+
+```
+
+
+
+
+
+
+DPLYR MUTATE
+```{r}
+BMI_chlstrl <- chlstrl %>% 
+  mutate(height = (height * 0.0254)) %>% 
+  mutate(weight = (weight * 0.454)) %>% 
+  mutate(BMI = (weight/(height)^2))
+```
+
+```{r}
+summary(BMI_chlstrl)
+```
+```{r}
+BMI_chol <- BMI_chlstrl %>% 
+  mutate(ageGroup = cut(age, breaks = c(10,40,70,100), labels = c("Grupo 1", "Grupo 2", "Grupo 3")))
+```
+
+```{r}
+BMI_chol %>% 
+  count(ageGroup)
+```
+
+```{r}
+BMI_chol %>% 
+  filter(gender == "female") %>% 
+  group_by(ageGroup)
+```
+Ejercicio 2
+Funciones de R
+
+Función cambioSigno
+```{r}
+cambioSigno <- function(x) {
+  lis <- (1:(length(x)-1))
+  conteo <- 0
+  
+  for(i in lis) {
+    if(x[i]>=0 & x[i+1] < 0) {conteo <- conteo + 1}
+    
+    else if (x[i] < 0 &x[i+1] > 0 ) {conteo <- conteo + 1}
+  }
+  return(conteo)
+}
+
+v <- c(-12, -19, 9, -13, -14, -17, 8, -19, -14)
+cambioSigno(v)
+```
+Modificar función para devolver la posición del cambio de signo
+```{r}
+cambioSignoPos <- function(x) {
+  lis <- (1:(length(x)-1))
+  conteo <- 0
+  f = 1
+  
+  posicion <- c()
+  
+  for(i in lis) {
+    if(x[i]>=0 & x[i+1] < 0) {conteo <- conteo + 1
+    posicion[f] = (i+1)
+    f = (f+1)}
+    
+    else if (x[i] < 0 &x[i+1] > 0 ) {conteo <- conteo + 1
+    posicion[f] = (i+1)
+    f= (f+1)}
+  }
+  return(posicion)
+}
+cambioSignoPos(v)
+```
+Utilizando sample para generar vectores aleatorios
+```{r}
+aleatorio <- sample(c(-10:10, size = 20, replace = TRUE))
+aleatorio
+cambioSigno(aleatorio)
+cambioSignoPos(aleatorio)
+```
+
+
+#Ejercicio 3. R4DS
+##3.6.1 Ejercicio 3
+
+```{r}
+ggplot(data = mpg, mapping= aes(x=displ, y=hwy)) +
+  geom_point(size=4) +
+  geom_smooth(se=FALSE, size = 2)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x= displ, y = hwy)) +
+  geom_smooth(mapping = aes(group = drv), se= FALSE, size=3) +
+  geom_point(size=4)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x= displ, y = hwy, color =drv)) +
+  geom_point(size=3) +
+  geom_smooth(se=FALSE, size=2)
+```
+
+```{r}
+ggplot(mpg, mapping = aes(x= displ, y = hwy, linetype= drv, color=drv)) +
+  geom_point(size=3) +
+  geom_smooth(se=FALSE, color="blue")
+```
+
+```{r}
+ggplot(mpg, mapping = aes(x=displ,y=hwy))+
+    geom_point(size=5, color="white") +
+    geom_point(aes(color=drv))
+```
+
+```{r}
+ggplot(mpg,mapping = aes(y=hwy, x=displ, color=drv)) +
+  geom_point(size=4) +
+  geom_smooth(se=FALSE)
+```
+##Ejercicio 5.2.4
+```{r}
+library(nycflights13)
+filter(flights, arr_delay >= 120)
+```
+
+```{r}
+filter(flights, dest =="IAH" | dest == "HOU")
+```
+
+```{r}
+filter(flights, carrier %in% c("UA", "AA", "DL"))
+```
+```{r}
+filter(flights, month %in% c("6","7","8"))
+```
+
+```{r}
+filter(flights, arr_delay >= 120, dep_delay == 0)
+```
+
+```{r}
+filter(flights, dep_delay >= 60, dep_delay - arr_delay > 30 )
+```
+
+```{r}
+summary(flights$arr_time)
+```
+```{r}
+filter(flights, dep_time >= 600 | dep_time == 2400)
+```
+
+```{r}
+filter(flights, between(month, 6,8))
+```
+
+```{r}
+filter(flights, between(dep_time,600,2400))
+```
+```{r}
+count(filter(flights, is.na(dep_time)))
+```
+
+```{r}
+summary(flights)
+```
+
+
+```{r}
+count(filter(flights, is.na(arr_time)))
+```
+
+```{r}
+count(filter(flights, is.na(dep_delay)))
+```
+```{r}
+count(filter(flights, is.na(tailnum)))
+```
+```{r}
+count(filter(flights, is.na(air_time)))
+```
