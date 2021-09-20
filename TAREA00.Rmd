@@ -1,0 +1,113 @@
+---
+title: "Tarea 0"
+author: "Fernando Silva"
+date: "20/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+```{r sample}
+dado_honesto = sample(1:6,100,replace = TRUE)
+dado_honesto 
+```
+
+
+```{r sample2}
+table(dado_honesto)
+```
+
+```{r sample3}
+signif(prop.table(table(dado_honesto)),2)
+```
+
+
+```{r dplyr}
+datos <- data.frame(dado_honesto)
+library(tidyverse)
+datos %>% 
+  count(datos$dado_honesto)
+```
+
+```{r sample_dc}
+dado_cargado = sample(1:6,100,replace = TRUE, prob = rep(c(6/7, 12/7), times = c(5, 1)))
+dado_cargado
+```
+
+
+```{r sample_dc2}
+table(dado_cargado)
+```
+
+```{r sample_dc3}
+signif(prop.table(table(dado_cargado)),2)
+```
+
+```{r dplyr2}
+datos2 <- data.frame(dado_cargado)
+library(tidyverse)
+datos2 %>% 
+  count(datos2$dado_cargado)
+```
+
+```{r}
+(v1 <- c(rep(4, times = 4), rep(3, times = 4), rep(2, times = 4), rep(1, times = 4)))
+
+(v2 <- c(rep(1, times = 1), rep(2, times = 2), rep(3, times = 3), rep(4, times = 4), rep(5, times = 5)))
+
+(v3 <- rep(c(1,2,3,4), times = 4))
+```
+
+```{r}
+
+mpg2 <- mpg %>% 
+  select(starts_with("c")) %>% 
+  filter(class == "pickup")
+
+(mpg2)
+```
+#Ejercicio5
+
+```{r}
+library(haven)
+census <- read_dta("DATA/census.dta")
+```
+
+```{r}
+(census2 <- census %>% 
+   group_by(region) %>%
+   summarize(total_pop = sum(pop)))
+```
+
+```{r}
+library(ggplot2)
+ggplot(census2, mapping = aes(x = region, y = total_pop)) + 
+  geom_bar(stat = "identity")
+```
+
+
+```{r}
+arrange(census, desc(pop))
+```
+
+```{r}
+census3 <- census %>% 
+  mutate(census, prop_mayor = pop65p / pop) %>%  
+  select(medage, prop_mayor) %>% 
+  arrange(medage)
+head(census3, 10)
+```
+
+
+```{r}
+(ggplot(data = census) + 
+  geom_histogram(mapping = aes(medage), binwidth = 0.3) + 
+  geom_density(mapping = aes(medage)))
+```
+
+
