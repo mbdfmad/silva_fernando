@@ -1,0 +1,194 @@
+---
+title: "Tarea A2"
+author: "Fernando Silva"
+date: "24/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(tidyselect)
+library(dplyr)
+library(grid)
+library(gridExtra)
+```
+
+# Ejercicio 1. 
+
+```{r}
+media <- 0*(64/125)+1*(48/125)+2*(12/125)+3*(1/125)
+var <- ((0-media)^2)*(64/125) +((1-media)^2)*(48/125) + ((2-media)^2)*(12/125) + ((3-media)^2)*(1/125) 
+cat(cat("La media es:", media), '\n')
+cat("La varianza es: ", var)
+```
+
+
+```{r}
+N = 100000
+n = 10
+mediasMuestrales = replicate(N, {
+  muestra = sample(c(0,1,2,3), n, replace = TRUE, prob = c(64, 48, 12, 1))
+  mean(muestra)
+})
+mediasMuestrales = data.frame(mediasMuestrales)
+ggplot(mediasMuestrales) +
+  geom_histogram(aes(mediasMuestrales)) +
+  geom_vline(aes(xintercept = media),color = "red") +
+  geom_vline(aes(xintercept = mean(mediasMuestrales)),color = "yellow")
+```
+
+
+```{r}
+N = 100000
+n = 30
+mediasMuestrales2 = replicate(N, {
+  muestra = sample(c(0,1,2,3), n, replace = TRUE, prob = c(64, 48, 12, 1))
+  mean(muestra)
+})
+mediasMuestrales2 = data.frame(mediasMuestrales2)
+ggplot(mediasMuestrales2) +
+  geom_histogram(aes(mediasMuestrales2)) +
+  geom_vline(aes(xintercept = media),color = "blue") +
+  geom_vline(aes(xintercept = mean(mediasMuestrales2)),color = "green")
+```
+
+
+#Apartado3
+
+```{r}
+x1 <- c(64/125, 48/125, 12/125, 1/125)
+x2 <- c(1/2, 1/4, 1/4)
+```
+
+#Calculamos las probabilidades de la suma
+```{r}
+p0 <- x2[1]*x1[1]
+p1 <- x2[2]*x1[1] + x2[1]*x1[2]
+p2 <- x2[3]*x1[1] + x2[2]*x1[2] + x2[1]*x1[3]
+p3 <- x2[1]*x1[4] + x2[2]*x1[3] + x2[3]*x1[2]
+p4 <- x2[2]*x1[4] + x2[3]*x1[3]
+p5 <- x2[3]*x1[4]
+```
+
+```{r}
+tabla_resultados = matrix(c(p0, p1, p2, p3, p4, p5), nrow = 1)
+colnames(tabla_resultados) =  c("Y0", "Y1", "Y2", "Y3", "Y4", "Y5")
+tabla_resultados
+```
+
+
+#Media teórica
+````{r}
+media_teorica <- sum(c(0:5)* tabla_resultados[1:5])
+media_teorica
+```
+#Ahora comprobamos si el valor de una muestra de 100.000 se parece a la media
+```{r}
+N = 100000
+valores = replicate(N, {
+  valor = sample(0:5, 1, prob = c(p0, p1, p2, p3, p4, p5))
+})
+media_muestral = mean(valores)
+media_muestral
+```
+
+#Ejercicio 2. Datos limpios
+
+```{r}
+library(readr)
+testResults <- read_csv("./DATA/testResults.csv")
+testResultsTidy <- testResults %>%
+  separate(gender_age, c("Gender", "Age"), sep = "_", convert = TRUE)
+testResultsTidy <- testResultsTidy %>%
+  pivot_longer(week1:week5, names_to="Week", names_prefix = "week")
+testResultsTidy
+```
+#Ejercicio 3. Lectura de R4DS.
+
+```{r}
+corte <- ggplot(data = diamonds, mapping = aes(x = cut, y = price)) +
+  geom_boxplot()
+color<- ggplot(data = diamonds, mapping = aes(x = color, y = price)) +
+  geom_boxplot()
+claridad <- ggplot(data = diamonds, mapping = aes(x = clarity, y = price)) +
+  geom_boxplot()
+corte
+color
+claridad
+```
+#Vamos ahora con las continuas
+```{r}
+quilates <- ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
+  geom_point()
+intensidad <- ggplot(data = diamonds, mapping = aes(x = depth, y = price)) + 
+  geom_point()
+tabla <- ggplot(data = diamonds, mapping = aes(x = table, y = price)) + 
+  geom_point()
+x <-  ggplot(data = diamonds, mapping = aes(x = x, y = price)) + 
+  geom_point()
+y <- ggplot(data = diamonds, mapping = aes(x = y, y = price)) + 
+  geom_point()
+z <- ggplot(data = diamonds, mapping = aes(x = z, y = price)) + 
+  geom_point()
+quilates
+intensidad
+tabla
+x
+y
+z
+```
+#Vemos la relación entre los quilates y el corte primero en densidad y luego en número
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, y = carat)) +
+  geom_boxplot()
+ggplot(data = diamonds, mapping = aes(x = carat, y = ..density..)) + 
+  geom_freqpoly(mapping = aes(colour = cut), binwidth = 0.1)
+```
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = ..count..)) + 
+  geom_freqpoly(mapping = aes(colour = cut), binwidth = 0.1)
+```
+
+```{r}
+datos_limpios <- who %>%
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65, 
+    names_to = "key", 
+    values_to = "cases", 
+    values_drop_na = TRUE
+  ) %>% 
+  mutate(
+    key = stringr::str_replace(key, "newrel", "new_rel")
+  ) %>%
+  separate(key, c("new", "var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+datos_limpios
+```
+#Calculamos el número total de casos por países
+```{r}
+casos_paises <- datos_limpios %>%
+  group_by(country) %>%
+  summarise(suma = sum(cases))
+casos_paises
+```
+```{r, EVAL = TRUE}
+lista_graficos <- list()
+lista_paises <-  casos_paises %>%
+  filter(suma > 1000000) %>%
+  select(country)
+aux <- datos_limpios %>%
+  filter(country %in% lista_paises$country)
+ggplot(aux) +
+    geom_bar(aes(x=age, y=cases),stat="identity",  position=position_dodge()) + 
+facet_grid(vars(country), vars(sex))
+```
